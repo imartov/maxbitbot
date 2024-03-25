@@ -114,19 +114,24 @@ async def finish_add_task(message: Message, state: FSMContext) -> None:
 @user_router.message(F.text.lower() == "посмотреть задачи")
 async def show_tasks(message: Message) -> None:
     ''' This handler receives messages with `/посмотреть задачи` command '''
-    with open('messages//show_tasks.txt', "r", encoding="utf-8") as file:
-        text = file.read()
-    await message.answer(text=text)
     with post_db.engine.connect() as connection:
         stmt = select(post_db.tasks)\
             .where(post_db.tasks.c.chat_id==message.from_user.id)
         tasks = list(connection.execute(stmt))
-    with open('messages//name_task.txt', "r", encoding="utf-8") as file:
-        text = file.read()
-    for task in tasks:
-        print(task, text)
-        await message.answer(text=text.format(name=task[2], id=task[0]),
-                             reply_markup=inline_kb_name_task)
+    if not tasks:
+        with open('messages//no_tasks.txt', "r", encoding="utf-8") as file:
+            text = file.read()
+        await message.answer(text=text, reply_markup=main_kb)
+    else:
+        with open('messages//show_tasks.txt', "r", encoding="utf-8") as file:
+            text = file.read()
+        await message.answer(text=text)
+        with open('messages//name_task.txt', "r", encoding="utf-8") as file:
+            text = file.read()
+        for task in tasks:
+            print(task, text)
+            await message.answer(text=text.format(name=task[2], id=task[0]),
+                                reply_markup=inline_kb_name_task)
 
 
 @user_router.callback_query(F.data == "detail")
@@ -193,7 +198,7 @@ async def delete_task(callback: types.CallbackQuery):
     with open('messages//delete_task.txt', "r", encoding="utf-8") as file:
         text = file.read().format(name=task_name)
     await bot.send_message(chat_id=callback.from_user.id,
-                           text=text, reply_markup=inline_kb_full_task)
+                           text=text, reply_markup=main_kb)
 
 
 @user_router.message()
