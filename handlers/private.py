@@ -9,16 +9,12 @@ from aiogram.filters import CommandStart, Command, or_f
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import StateFilter
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy import update, delete
 
 from kbrds.inline import inline_kb_full_task, inline_kb_name_task
 from kbrds.reply import main_kb
 from service import get_id_from_message
 from handlers.fsm import AddTask, AddUser
 import database.sql_query as db
-# import post_db
 
 
 bot = Bot(os.getenv("TG_ROKEN"))
@@ -102,7 +98,7 @@ async def finish_add_task(message: Message, state: FSMContext) -> None:
         await message.answer(text="Задача успешно добавлена",
                              reply_markup=main_kb)
     else:
-        await db.update_task(task_id=data["task_id"], data=data)
+        await db.update_task(data=data, task_id=data["task_id"])
         await message.answer(text="Задача успешно обновлена",
                              reply_markup=main_kb)
     await state.clear()
@@ -125,7 +121,7 @@ async def show_tasks(message: Message) -> None:
 @user_router.callback_query(F.data == "detail")
 async def detail_task(callback: types.CallbackQuery):
     ''' This handler receives messages with '/detail' command '''
-    task_id = get_id_from_message(text=callback.message.text)
+    task_id = await get_id_from_message(text=callback.message.text)
     task = await db.select_detail_tasks(chat_id=callback.from_user.id, task_id=task_id)
     await bot.send_message(chat_id=callback.from_user.id,
                            text="Имя - {}\nОписание - {}\nid - {}"\
@@ -133,63 +129,40 @@ async def detail_task(callback: types.CallbackQuery):
                             reply_markup=inline_kb_full_task)
 
 
-# @user_router.callback_query(F.data == "complete")
-# async def complete_task(callback: types.CallbackQuery):
-#     ''' This handler receives messages with '/complete_task' command '''
-#     task_id = get_id_from_message(text=callback.message.text)
-#     with post_db.engine.connect() as connection:
-#         stmt = select(post_db.tasks)\
-#             .where(post_db.tasks.c.id==task_id)
-#         task_name = list(connection.execute(stmt))[0][2]
-#     with post_db.engine.connect() as connection:
-#         stmt = (
-#             delete(post_db.tasks).
-#             where(post_db.tasks.c.id == task_id)
-#         )
-#         connection.execute(stmt)
-#         connection.commit()
-#     with open('messages//complete_task.txt', "r", encoding="utf-8") as file:
-#         text = file.read().format(name=task_name)
-#     await bot.send_message(chat_id=callback.from_user.id, text=text, reply_markup=main_kb)
+@user_router.callback_query(F.data == "complete")
+async def complete_task(callback: types.CallbackQuery):
+    ''' This handler receives messages with '/complete_task' command '''
+    task_id = await get_id_from_message(text=callback.message.text)
+    task_name = await db.complete_task(task_id=task_id)
+    await bot.send_message(chat_id=callback.from_user.id,
+                           text=f"Задача - {task_name} - выполнена",
+                           reply_markup=main_kb)
 
 
 @user_router.callback_query(StateFilter(None), F.data == "update")
 async def update_task(callback: types.CallbackQuery, state: FSMContext):
     ''' This handler receives messages with '/update' command '''
-    task_id = get_id_from_message(text=callback.message.text)
+    task_id = await get_id_from_message(text=callback.message.text)
     await state.update_data(task_id=task_id)
-    with open('messages//update_task_name.txt', "r", encoding="utf-8") as file:
-        text = file.read()
     await bot.send_message(chat_id=callback.from_user.id,
-                           text=text,
+                           text="Введите новое имя задачи",
                            reply_markup=types.ReplyKeyboardRemove())
     await state.set_state(AddTask.name)
 
 
-# @user_router.callback_query(F.data == "delete")
-# async def delete_task(callback: types.CallbackQuery):
-#     ''' This handler receives messages with '/delete' command '''
-#     task_id = get_id_from_message(text=callback.message.text)
-#     with post_db.engine.connect() as connection:
-#         stmt = select(post_db.tasks)\
-#             .where(post_db.tasks.c.id==task_id)
-#         task_name = list(connection.execute(stmt))[0][2]
-#         stmt = (
-#                 delete(post_db.tasks).
-#                 where(post_db.tasks.c.id == task_id)
-#         )
-#         connection.execute(stmt)
-#         connection.commit()
-#     with open('messages//delete_task.txt', "r", encoding="utf-8") as file:
-#         text = file.read().format(name=task_name)
-#     await bot.send_message(chat_id=callback.from_user.id,
-#                            text=text, reply_markup=main_kb)
+@user_router.callback_query(F.data == "delete")
+async def delete_task(callback: types.CallbackQuery):
+    ''' This handler receives messages with '/delete' command '''
+    task_id = await get_id_from_message(text=callback.message.text)
+    task_name = await db.delete_task(task_id=task_id)
+    await bot.send_message(chat_id=callback.from_user.id,
+                           text=f"Задача - {task_name} - удалена",
+                           reply_markup=main_kb)
 
 
 @user_router.message()
 async def error_command(message: Message) -> None:
     ''' This handler receives messages with any command '''
-    with open('messages//error_command.txt', "r", encoding="utf-8") as file:
-        text = file.read()
-    await message.answer(text=text, reply_markup=main_kb)
+    await message.answer(text="Некорректная команда\nПожалуйста, повторите ввод",
+                         reply_markup=main_kb)
     

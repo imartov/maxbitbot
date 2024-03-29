@@ -2,7 +2,7 @@
 This module contains service methods
 '''
 
-def get_id_from_message(text: str) -> int:
+async def get_id_from_message(text: str) -> int:
     text_list = text.split("\n")
     for item in text_list:
         if "id" in item:

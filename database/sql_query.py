@@ -1,4 +1,5 @@
 import os
+from typing import Any
 import asyncio
 import asyncpg
 from dotenv import load_dotenv
@@ -38,16 +39,16 @@ async def insert_task(data: dict):
         data["chat_id"], data["name"], data["description"])
     
 
-async def update_task(**kwargs):
+async def update_task(data: dict, **kwargs: Any):
     conn = await create_conn()
     await conn.execute('''
         UPDATE task SET name = $1, description = $2
-        WHERE chat_id = $3''',
-        data["name"], data["description"], task_id)
+        WHERE id = $3''',
+        data["name"], data["description"], kwargs.get("task_id"))
     await conn.close()
     
 
-async def select_tasks(chat_id: int):
+async def select_tasks(chat_id: int) -> list:
     conn = await create_conn()
     rows = await conn.fetch('SELECT id, name FROM task WHERE chat_id = $1', chat_id)
     await conn.close()
@@ -57,7 +58,7 @@ async def select_tasks(chat_id: int):
     return data
 
 
-async def select_detail_tasks(chat_id: int, task_id: int):
+async def select_detail_tasks(chat_id: int, task_id: int) -> dict:
     conn = await create_conn()
     row = await conn.fetchrow('''SELECT id, name, description FROM task
                               WHERE chat_id = $1 AND id = $2''', chat_id, task_id)
@@ -65,10 +66,30 @@ async def select_detail_tasks(chat_id: int, task_id: int):
     return dict(row)
 
 
+async def complete_task(**kwargs: Any) -> str:
+    conn = await create_conn()
+    row = await conn.fetchrow('''SELECT chat_id, name, description FROM task
+                                 WHERE id = $1
+                              ''', kwargs.get("task_id"))
+    completed_task = dict(row)
+    task_name = completed_task["name"]
+    await conn.execute('''INSERT INTO completedtask(chat_id, name, description)
+                          VALUES($1, $2, $3)
+                       ''', completed_task["chat_id"], completed_task["name"], completed_task["description"])
+    await conn.execute('''DELETE FROM task
+                          WHERE id = $1''', kwargs.get("task_id"))
+    await conn.close()
+    return task_name
+
+
+async def delete_task(**kwargs: Any) -> str:
+    conn = await create_conn()
+    row = await conn.fetchrow('''SELECT name FROM task
+                                 WHERE id = $1''', kwargs.get("task_id"))
+    task_name = dict(row)["name"]
+    await conn.execute('''DELETE FROM task
+                          WHERE id = $1''', kwargs.get("task_id"))
+
 
 if __name__ == "__main__":
-    data = {
-        "name": "New Name",
-        "description": "New  description"
-    }
-    asyncio.run(update_task(task_id=1, data=data))
+    pass

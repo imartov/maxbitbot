@@ -22,3 +22,12 @@ class Task(Base):
     chat_id: Mapped[int] = mapped_column(ForeignKey("users.chat_id"))
     name: Mapped[str] = mapped_column(String(256))
     description: Mapped[str] = mapped_column(Text)
+
+
+class CompletedTask(Base):
+    __tablename__ = 'completedtask'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    chat_id: Mapped[int] = mapped_column(ForeignKey("users.chat_id"))
+    name: Mapped[str] = mapped_column(String(256))
+    description: Mapped[str] = mapped_column(Text)
