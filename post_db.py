@@ -20,22 +20,22 @@ engine = create_engine(url_db)
 
 metadata_obj = MetaData()
 
-users = Table(
-    "users",
-    metadata_obj,
-    Column("id", db.Integer, primary_key=True, autoincrement=True),
-    Column("chat_id", db.Integer, unique=True),
-    Column("user_name", db.String),
-)
+# users = Table(
+#     "users",
+#     metadata_obj,
+#     Column("id", db.Integer, primary_key=True, autoincrement=True),
+#     Column("chat_id", db.Integer, unique=True),
+#     Column("user_name", db.String),
+# )
 
-tasks = Table(
-    "tasks",
-    metadata_obj,
-    Column("id", db.Integer, primary_key=True, autoincrement=True),
-    Column("chat_id", db.Integer, db.ForeignKey("users.chat_id"), nullable=False),
-    Column("name", db.String(collation="Cyrillic_General_CI_AS")),
-    Column("description", db.Text(collation="Cyrillic_General_CI_AS")),
-)
+# tasks = Table(
+#     "tasks",
+#     metadata_obj,
+#     Column("id", db.Integer, primary_key=True, autoincrement=True),
+#     Column("chat_id", db.Integer, db.ForeignKey("users.chat_id"), nullable=False),
+#     Column("name", db.String()),
+#     Column("description", db.Text()),
+# )
 
 metadata_obj.create_all(engine)
 
