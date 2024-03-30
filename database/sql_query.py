@@ -1,14 +1,6 @@
-import os
 from typing import Any
 import asyncio
-import asyncpg
-from dotenv import load_dotenv
-
-load_dotenv()
-
-async def create_conn():
-    conn = await asyncpg.connect(f'postgresql://{os.getenv("DB_USER")}:{os.getenv("DB_PASSWORD")}@{os.getenv("DB_HOST")}:{os.getenv("DB_PORT")}/{os.getenv("DB_NAME")}')
-    return conn
+from database.conn import create_conn
 
 
 async def check_exist_chat_id(chat_id: int):
@@ -29,7 +21,7 @@ async def insert_user(data: dict):
     conn = await create_conn()
     await conn.execute('''
         INSERT INTO users(chat_id, user_name, login) VALUES($1, $2, $3)''',
-        data["chat_id"], data["user_name"], data["login"])
+        data["chat_id"], data["user_name"], data["login_value"])
     
 
 async def insert_task(data: dict):
@@ -93,4 +85,11 @@ async def delete_task(**kwargs: Any) -> str:
 
 
 if __name__ == "__main__":
+    data = {
+        "id": 1,
+        "chat_id": 640814744,
+        "name": "Ноавая задача",
+        "description": "Описание для новой задача"
+    }
+    asyncio.run(insert_task(data=data))
     pass

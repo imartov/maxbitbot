@@ -3,7 +3,13 @@ from aiogram.fsm.state import StatesGroup, State
 
 class AddUser(StatesGroup):
     user_name = State()
-    login = State()
+    choose_login = State()
+    login_key = State()
+    login_value = State()
+
+    texts = {
+        'AddUser:user_name':'Введите Ваше имя заново:',
+    }
 
 
 class AddTask(StatesGroup):
@@ -12,3 +18,7 @@ class AddTask(StatesGroup):
     name = State()
     description = State()
     task_id = State()
+
+    texts = {
+        'AddTask:name':'Введите имя задачи заново:',
+    }
