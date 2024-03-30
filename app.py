@@ -37,6 +37,8 @@ async def main() -> None:
     ''' This method implements a sequence of commands to launch a telegram bot '''
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
+
+    # temp
     dp.update.middleware(DataBaseSession(session_pool=session_maker))
 
     await bot.delete_webhook(drop_pending_updates=True)

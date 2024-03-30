@@ -4,7 +4,7 @@ This module contains event handlers for the user's private messages
 
 import os
 
-from aiogram import Router, types, F, Bot
+from aiogram import Router, types, F
 from aiogram.filters import CommandStart, Command, or_f
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
@@ -12,12 +12,10 @@ from aiogram.filters import StateFilter
 
 from kbrds.inline import inline_kb_full_task, inline_kb_name_task, get_callback_btns
 from kbrds.reply import main_kb
-from service import get_id_from_message
 from handlers.fsm import AddTask, AddUser
 import database.sql_query as db
 
 
-bot = Bot(os.getenv("TG_ROKEN"))
 user_router = Router()
 
 
@@ -114,8 +112,6 @@ async def show_tasks(message: Message) -> None:
     else:
         await message.answer(text="Вот список Ваших задач")
         for task in tasks:
-            # await message.answer(text=f"{task['name']}\nid - {task['id']}",
-            #                     reply_markup=inline_kb_name_task)
             await message.answer(text=f"{task['name']}",
                                 reply_markup=get_callback_btns(
                                     btns={
@@ -125,60 +121,48 @@ async def show_tasks(message: Message) -> None:
                                 ))
 
 
-# @user_router.callback_query(F.data == "detail")
 @user_router.callback_query(F.data.startswith("detail_"))
 async def detail_task(callback: types.CallbackQuery):
     ''' This handler receives messages with '/detail' command '''
-    # task_id = await get_id_from_message(text=callback.message.text)
     task_id = int(callback.data.split("_")[-1])
     task = await db.select_detail_tasks(chat_id=callback.from_user.id, task_id=task_id)
-    await bot.send_message(chat_id=callback.from_user.id,
-                           text="Имя - {}\nОписание - {}"\
-                            .format(task["name"], task["description"]),
-                            reply_markup=get_callback_btns(
-                                btns={
-                                    "Изменить": f"update_{task_id}",
-                                    "Удалить": f"delete_{task_id}",
-                                    "Выполнить": f"complete_{task_id}",
-                                }
-                            ))
+    await callback.message.answer(text="Имя - {}\nОписание - {}"\
+                                  .format(task["name"], task["description"]),
+                                  reply_markup=get_callback_btns(
+                                      btns={
+                                          "Изменить": f"update_{task_id}",
+                                          "Удалить": f"delete_{task_id}",
+                                          "Выполнить": f"complete_{task_id}",
+                                      }
+                                  ))
 
 
-# @user_router.callback_query(F.data == "complete")
 @user_router.callback_query(F.data.startswith("complete_"))
 async def complete_task(callback: types.CallbackQuery):
     ''' This handler receives messages with '/complete_task' command '''
-    # task_id = await get_id_from_message(text=callback.message.text)
     task_id = task_id = int(callback.data.split("_")[-1])
     task_name = await db.complete_task(task_id=task_id)
-    await bot.send_message(chat_id=callback.from_user.id,
-                           text=f"Задача - {task_name} - выполнена",
-                           reply_markup=main_kb)
+    await callback.message.answer(text=f"Задача - {task_name} - выполнена",
+                                  reply_markup=main_kb)
 
 
-# @user_router.callback_query(StateFilter(None), F.data == "update")
 @user_router.callback_query(StateFilter(None), F.data.startswith("update_"))
 async def update_task(callback: types.CallbackQuery, state: FSMContext):
     ''' This handler receives messages with '/update' command '''
-    # task_id = await get_id_from_message(text=callback.message.text)
     task_id = task_id = int(callback.data.split("_")[-1])
     await state.update_data(task_id=task_id)
-    await bot.send_message(chat_id=callback.from_user.id,
-                           text="Введите новое имя задачи",
-                           reply_markup=types.ReplyKeyboardRemove())
+    await callback.message.answer(text="Введите новое имя задачи",
+                                  reply_markup=types.ReplyKeyboardRemove())
     await state.set_state(AddTask.name)
 
 
-# @user_router.callback_query(F.data == "delete")
 @user_router.callback_query(F.data.startswith("delete_"))
 async def delete_task(callback: types.CallbackQuery):
     ''' This handler receives messages with '/delete' command '''
-    # task_id = await get_id_from_message(text=callback.message.text)
     task_id = int(callback.data.split("_")[-1])
     task_name = await db.delete_task(task_id=task_id)
-    await bot.send_message(chat_id=callback.from_user.id,
-                           text=f"Задача - {task_name} - удалена",
-                           reply_markup=main_kb)
+    await callback.message.answer(text=f"Задача - {task_name} - удалена",
+                                  reply_markup=main_kb)
 
 
 @user_router.message()
