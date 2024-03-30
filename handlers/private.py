@@ -51,6 +51,14 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     if current_state == AddTask.name or current_state == AddUser.user_name:
         await message.answer('Предыдущего шага нет\nВведите имя задачи или "отмена"')
         return
+    if current_state == AddUser.login_value:
+        await message.answer("Ок, выберите, каким будет Ваш логин",
+                             reply_markup=get_callback_btns(btns={
+                                 "username телеграма": "tgusername",
+                                 "Собственный": "enteryourself"
+                             }))
+        await state.set_state(AddUser.login_key)
+        return
     previous = None
     for step in using_state.__all_states__:
         if step.state == current_state:
