@@ -89,6 +89,7 @@ async def delete_task(**kwargs: Any) -> str:
     task_name = dict(row)["name"]
     await conn.execute('''DELETE FROM task
                           WHERE id = $1''', kwargs.get("task_id"))
+    return task_name
 
 
 if __name__ == "__main__":
