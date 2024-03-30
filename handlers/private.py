@@ -20,7 +20,7 @@ user_router = Router()
 
 @user_router.message(StateFilter(None), CommandStart())
 async def command_start_handler(message: Message, state: FSMContext) -> None:
-    """ This handler receives messages with `/start` command """
+    """ The handler receives messages with `/start` command """
     if not await db.check_exist_chat_id(message.from_user.id):
         with open("messages\\start.txt", "r", encoding="utf-8") as file:
             hello_text = file.read().format(user_name=message.from_user.full_name)
@@ -36,6 +36,7 @@ async def command_start_handler(message: Message, state: FSMContext) -> None:
 @user_router.message(StateFilter('*'), Command("отмена"))
 @user_router.message(StateFilter('*'), F.text.casefold() == "отмена")
 async def cancel_handler(message: types.Message, state: FSMContext) -> None:
+    ''' The handler processes "отмена" message with FSM active '''
     current_state = await state.get_state()
     if current_state is None:
         return
@@ -46,6 +47,7 @@ async def cancel_handler(message: types.Message, state: FSMContext) -> None:
 @user_router.message(StateFilter('*'), Command("назад"))
 @user_router.message(StateFilter('*'), F.text.casefold() == "назад")
 async def back_step_handler(message: types.Message, state: FSMContext) -> None:
+    ''' The handler processes "отмена" message with FSM active '''
     current_state = await state.get_state()
     using_state = AddTask if "AddTask" in str(current_state) else AddUser
     if current_state == AddTask.name or current_state == AddUser.user_name:
@@ -63,14 +65,16 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     for step in using_state.__all_states__:
         if step.state == current_state:
             await state.set_state(previous)
-            await message.answer(f"Ок, вы вернулись к прошлому шагу \n {using_state.texts[previous.state]}")
+            with open("messages\\prev_step.txt", "r", encoding="utf-8") as file:
+                text = file.read().format(step=using_state.texts[previous.state])
+            await message.answer(text=text)
             return
         previous = step
 
 
 @user_router.message(AddUser.choose_login, F.text)
-async def input_user_name(message: Message, state: FSMContext) -> None:
-    """ This handler receives messages with `/start` command """
+async def choose_login(message: Message, state: FSMContext) -> None:
+    ''' The handler processes the message when Add User.choose_login is active in FSM '''
     await state.update_data(user_name=message.text)
     with open("messages\\choose_login.txt", "r", encoding="utf-8") as file:
         text = file.read()
@@ -83,8 +87,9 @@ async def input_user_name(message: Message, state: FSMContext) -> None:
 
 
 @user_router.callback_query(AddUser.login_key, F.data == "tgusername")
-async def detail_task(callback: types.CallbackQuery, state: FSMContext):
-    ''' This handler receives messages with '/detail' command '''
+async def choose_tgusername(callback: types.CallbackQuery, state: FSMContext):
+    ''' The handler processes the "username телеграма" inline-button
+        when Add User.login_key is active in FSM '''
     await state.update_data(login_value=callback.from_user.username)
     data = await state.get_data()
     data["chat_id"] = callback.from_user.id
@@ -96,8 +101,9 @@ async def detail_task(callback: types.CallbackQuery, state: FSMContext):
 
 
 @user_router.callback_query(AddUser.login_key, F.data == "enteryourself")
-async def detail_task(callback: types.CallbackQuery, state: FSMContext):
-    ''' This handler receives messages with '/detail' command '''
+async def choose_enteryourself(callback: types.CallbackQuery, state: FSMContext):
+    ''' The handler processes the "Собственный" inline-button
+        when Add User.login_key is active in FSM '''
     await callback.message.answer(text="Введите уникальный логин",
                                   reply_markup=types.ReplyKeyboardRemove())
     await state.set_state(AddUser.login_value)
@@ -105,7 +111,8 @@ async def detail_task(callback: types.CallbackQuery, state: FSMContext):
 
 @user_router.message(AddUser.login_value, F.text)
 async def input_user_name(message: Message, state: FSMContext) -> None:
-    """ This handler receives messages with `/start` command """
+    ''' The handler processes the message when Add User.login_value is active in FSM
+        and takes the username value for the user when registering '''
     if not await db.check_exist_login(login=message.text):
         await state.update_data(login_value=message.text)
         data = await state.get_data()
@@ -141,7 +148,8 @@ async def add_task(message: Message, state: FSMContext) -> None:
 
 @user_router.message(AddTask.name, F.text)
 async def add_description(message: Message, state: FSMContext) -> None:
-    ''' The handler receives the task name and waits for the task description '''
+    ''' The handler receives the task name and waits for the task description
+        in FSM when Add AddTask.name is active in FSM '''
     await state.update_data(name=message.text)
     data = await state.get_data()
     if "task_id" not in data:
@@ -155,7 +163,9 @@ async def add_description(message: Message, state: FSMContext) -> None:
 
 @user_router.message(AddTask.description, F.text)
 async def finish_add_task(message: Message, state: FSMContext) -> None:
-    ''' The handler receives the task description and completes adding the task '''
+    ''' The handler receives the task description
+        in FSM when Add AddTask.description is active in FSM
+        and completes adding the task '''
     try:
         await state.update_data(description=message.text)
         data = await state.get_data()
@@ -178,7 +188,7 @@ async def finish_add_task(message: Message, state: FSMContext) -> None:
 
 @user_router.message(F.text.lower() == "посмотреть задачи")
 async def show_tasks(message: Message) -> None:
-    ''' This handler receives messages with `/посмотреть задачи` command '''
+    ''' This handler receives `/посмотреть задачи` inline-button command '''
     tasks = await db.select_tasks(chat_id=message.from_user.id)
     if not tasks:
         await message.answer(text="У Вас отсутствуют задачи",
@@ -195,11 +205,10 @@ async def show_tasks(message: Message) -> None:
 
 @user_router.callback_query(F.data.startswith("detail_"))
 async def detail_task(callback: types.CallbackQuery):
-    ''' This handler receives messages with '/detail' command '''
+    ''' This handler receives '/detail' inline-button command '''
     task_id = int(callback.data.split("_")[-1])
-    task = await db.select_detail_tasks(chat_id=callback.from_user.id, task_id=task_id)
-    await callback.message.answer(text="Имя - {}\nОписание - {}"\
-                                  .format(task["name"], task["description"]),
+    task = await db.select_detail_tasks(task_id=task_id)
+    await callback.message.answer(text=f"Имя - {task['name']}\nОписание - {task['description']}",
                                   reply_markup=get_callback_btns(btns={
                                           "Изменить": f"update_{task_id}",
                                           "Удалить": f"delete_{task_id}",
@@ -209,7 +218,7 @@ async def detail_task(callback: types.CallbackQuery):
 
 @user_router.callback_query(F.data.startswith("complete_"))
 async def complete_task(callback: types.CallbackQuery):
-    ''' This handler receives messages with '/complete_task' command '''
+    ''' This handler receives '/complete_task' inline-button command '''
     task_id = task_id = int(callback.data.split("_")[-1])
     task_name = await db.complete_task(task_id=task_id)
     await callback.message.answer(text=f"Задача - {task_name} - выполнена",
@@ -218,7 +227,7 @@ async def complete_task(callback: types.CallbackQuery):
 
 @user_router.callback_query(StateFilter(None), F.data.startswith("update_"))
 async def update_task(callback: types.CallbackQuery, state: FSMContext):
-    ''' This handler receives messages with '/update' command '''
+    ''' This handler receives '/update' inline-button command '''
     task_id = task_id = int(callback.data.split("_")[-1])
     await state.update_data(task_id=task_id)
     await callback.message.answer(text="Введите новое имя задачи",
@@ -228,7 +237,7 @@ async def update_task(callback: types.CallbackQuery, state: FSMContext):
 
 @user_router.callback_query(F.data.startswith("delete_"))
 async def delete_task(callback: types.CallbackQuery):
-    ''' This handler receives messages with '/delete' command '''
+    ''' This handler receives '/delete' inline-button command '''
     task_id = int(callback.data.split("_")[-1])
     task_name = await db.delete_task(task_id=task_id)
     await callback.message.answer(text=f"Задача - {task_name} - удалена",

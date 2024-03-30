@@ -21,19 +21,21 @@ dp = Dispatcher(storage=MemoryStorage(), fsm_strategy=FSMStrategy.USER_IN_CHAT)
 dp.include_router(user_router)
 
 
-async def on_startup(bot):
+async def on_startup():
+    ''' The method contains methods that are called when the bot is launched '''
     run_param = False
     if run_param:
         await drop_orm_tables()
     else:
         await create_orm_tables()
 
-async def on_shutdown(bot):
+async def on_shutdown():
+    ''' The method contains methods that are called when the bot is shutdown '''
     print('бот лег')
 
 
 async def main() -> None:
-    ''' This method implements a sequence of commands to launch a telegram bot '''
+    ''' The method implements a sequence of commands to launch a telegram bot '''
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
     await bot.delete_webhook(drop_pending_updates=True)

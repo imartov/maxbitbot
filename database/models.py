@@ -1,12 +1,23 @@
+'''
+The model contains database schemas
+At the developer's choice, two approaches can be used:
+standard (T-SQL) - using the asyncpg library
+ORM - SQLAlchemy
+'''
+
 from sqlalchemy import String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import ForeignKey
 
+
+# ORM approach
 class Base(DeclarativeBase):
+    ''' This class is the parent class for other table classes '''
     pass
 
 
 class Users(Base):
+    ''' The class is the users table '''
     __tablename__ = 'users'
 
     chat_id: Mapped[int] = mapped_column(primary_key=True)
@@ -15,6 +26,7 @@ class Users(Base):
 
 
 class Task(Base):
+    ''' The class is the task table '''
     __tablename__ = 'task'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -24,6 +36,7 @@ class Task(Base):
 
 
 class CompletedTask(Base):
+    ''' The class is the completedtask table '''
     __tablename__ = 'completedtask'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -32,42 +45,15 @@ class CompletedTask(Base):
     description: Mapped[str] = mapped_column(Text)
 
 
-async def create_sql_tables():
+# standart SQL approach
+async def create_sql_tables() -> None:
+    ''' The method creates tables using SQL-query and asyncpg '''
     from database.conn import create_conn
     conn = await create_conn()
-
-    await conn.execute('''
-        CREATE TABLE users (
-            chat_id SERIAL NOT NULL,
-            user_name VARCHAR(100) NOT NULL,
-            login VARCHAR(100) NOT NULL,
-            PRIMARY KEY (chat_id),
-            UNIQUE (login)
-        )
-    ''')
-
-    await conn.execute('''
-        CREATE TABLE task (
-            id SERIAL NOT NULL,
-            chat_id INTEGER NOT NULL,
-            name VARCHAR(256) NOT NULL,
-            description TEXT NOT NULL,
-            PRIMARY KEY (id)
-            FOREIGN KEY(chat_id) REFERENCES users (chat_id) ON DELETE CASCADE
-        )
-    ''')
-
-    await conn.execute('''
-        CREATE TABLE completedtask (
-            id SERIAL NOT NULL,
-            chat_id INTEGER NOT NULL,
-            name VARCHAR(256) NOT NULL,
-            description TEXT NOT NULL,
-            PRIMARY KEY (id),
-            FOREIGN KEY(chat_id) REFERENCES users (chat_id) ON DELETE CASCADE
-        )
-    ''')
+    with open ("database\\sql_query\\create_tables.sql", "r", encoding="utf-8") as file:
+        sql_query = file.read()
+    await conn.execute(sql_query)
 
 
-async def drop_sql_tables():
-    pass
+if __name__ == "__main__":
+    ...
