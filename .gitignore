@@ -3,3 +3,6 @@
 
 # custom
 commands
+
+# cache
+__pycache__
