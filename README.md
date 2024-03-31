@@ -123,6 +123,31 @@ The main classes and functions:
 |:---:|:---:|
 | The method dynamically generates an inline menu сallback_data is used as an additional mandatory argument | `aiogram.utils.keyboard.InlineKeyboardBuilder()` and `aiogram.types.KeyboardButton()` |
 
+### common.bot_cmds_list.private
+| Purpose | Interaction |
+|:---:|:---:|
+| The variable that forms the list of main commands | `aiogram.types.BotCommand()` |
+
+### handlers.private.command_start_handler
+| Purpose | Interaction |
+|:---:|:---:|
+| The handler receives messages with `/start` command | `aiogram.Router()`, `aiogram.fsm.context.FSMContext()`, `aiogram.types.Message()` |
+
+### handlers.private.menu_cmd
+| Purpose | Interaction |
+|:---:|:---:|
+| This handler receives messages with `/menu` command | `aiogram.Router()`, `aiogram.F`, `aiogram.types.Message()` |
+
+### handlers.fsm.AddUser
+| Purpose | Interaction |
+|:---:|:---:|
+| The class of Finite State Machine object is used when registering a user | `aiogram.fsm.state.StatesGroup()`, `aiogram.fsm.state.State()` |
+
+### handlers.fsm.AddTask
+| Purpose | Interaction |
+|:---:|:---:|
+| The class of Finite State Machine object is used when adding a task | `aiogram.fsm.state.StatesGroup()`, `aiogram.fsm.state.State()` |
+
 ## Contributing
 
 Contributions are welcome! If you'd like to contribute to the project, please follow these steps:
