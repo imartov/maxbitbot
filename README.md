@@ -1,4 +1,4 @@
-# Telegram Task Manager Bot
+# Maxbitbot | Telegram Task Manager Bot
 
 ## Overview
 
