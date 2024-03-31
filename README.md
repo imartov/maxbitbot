@@ -58,11 +58,7 @@ maxbitbot/
    ```bash
    git clone https://github.com/imartov/maxbitbot.git
    ```
-2. **Install Dependencies**: Install the required Python dependencies using pip.
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. **Set Up Configuration**: Create a `.env` file and specify the required environment variables such as Telegram bot token, database connection details, etc.
+2. **Set Up Configuration**: Create a `.env` file and specify the required environment variables such as Telegram bot token, database connection details, etc.
    ```plaintext
    TG_ROKEN=<your-telegram-bot-token>
    DB_USER=<your-postgres-username>
@@ -71,8 +67,18 @@ maxbitbot/
    DB_PORT=<your-postgres-port>
    DB_NAME=<your-postgres-db-name>
    ```
+### Docker Compose
+3. **Execute the command**:
+    ```bash
+    docker-compose up
+    ```
+### Classic approach
+3. **Install Dependencies**: Install the required Python dependencies using pip.
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## Usage
+## Usage (Classic approach)
 
 1. **Start the Bot**: Run the bot application using the following command.
    ```bash
