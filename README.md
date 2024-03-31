@@ -148,6 +148,27 @@ The main classes and functions:
 |:---:|:---:|
 | The class of Finite State Machine object is used when adding a task | `aiogram.fsm.state.StatesGroup()`, `aiogram.fsm.state.State()` |
 
+## A detailed description of the implemented functionality, including examples of using the bot
+
+This section contains a detailed description of the main application scenario.
+
+### Adding a task
+![alt text](addtask-1.jpg)
+
+### Updating the task
+![alt text](updatetask.jpg)
+
+### Viewing tasks
+![alt text](showtasks.jpg)
+
+### The task management
+![alt text](managtask.jpg)
+
+### Cancel or back FSM
+At each step when using FSM, the user can enter:  
+- `отмена`, which will cancel all the actions performed, or  
+- `назад`, which will return the user to the previous step
+
 ## Contributing
 
 Contributions are welcome! If you'd like to contribute to the project, please follow these steps:
