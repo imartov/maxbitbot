@@ -1,8 +1,8 @@
-# Maxbitbot | Telegram Task Manager Bot
+# [Maxbitbot](https://t.me/maxbittg) | Telegram Task Manager Bot
 
 ## Overview
 
-The Telegram Task Manager Bot is a Python-based bot that helps users manage their tasks efficiently on the Telegram platform. Users can register, add tasks, modify them, mark them as complete, and delete them.
+The [Maxbitbot | Telegram Task Manager Bot](https://t.me/maxbittg) is a Python-based bot that helps users manage their tasks efficiently on the Telegram platform. Users can register, add tasks, modify them, mark them as complete, and delete them.
 
 ## Features
 
@@ -52,13 +52,19 @@ maxbitbot/
 └── requirements.txt
 ```
 
-## Setup
+## Setup and Usage
 
 1. **Clone the Repository**: Clone this repository to your local machine.
    ```bash
    git clone https://github.com/imartov/maxbitbot.git
    ```
-2. **Set Up Configuration**: Create a `.env` file and specify the required environment variables such as Telegram bot token, database connection details, etc.
+
+2. Go to the project folder:
+```bash
+cd maxbitbot
+```
+
+3. **Set Up Configuration**: Create a `.env` file and specify the required environment variables such as Telegram bot token, database connection details, etc.
    ```plaintext
    TG_ROKEN=<your-telegram-bot-token>
    DB_USER=<your-postgres-username>
@@ -67,23 +73,29 @@ maxbitbot/
    DB_PORT=<your-postgres-port>
    DB_NAME=<your-postgres-db-name>
    ```
+
 ### Docker Compose
-3. **Execute the command**:
+
+4. **Execute the command**:
     ```bash
     docker-compose up
     ```
+
 ### Classic approach
-3. **Install Dependencies**: Install the required Python dependencies using pip.
+
+4. **Install Dependencies**: Install the required Python dependencies using pip.
    ```bash
    pip install -r requirements.txt
    ```
 
-## Usage (Classic approach)
-
-1. **Start the Bot**: Run the bot application using the following command.
+5. **Start the Bot**: Run the bot application using the following command.
    ```bash
    python app.py
    ```
+**Attention!** Before executing the command, make sure that your database is running and its settings correspond to the variables specified in .env.
+
+6. Find the bot in the telegram - [Maxbitbot](https://t.me/maxbittg) bot run the `start` command and enjoy using it!
+
 2. **Interacting with the Bot**: Users can interact with the bot by sending commands and following the bot's prompts for task management.
 
 ## Architectural description
