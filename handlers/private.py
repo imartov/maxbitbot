@@ -22,12 +22,12 @@ user_router = Router()
 async def command_start_handler(message: Message, state: FSMContext) -> None:
     """ The handler receives messages with `/start` command """
     if not await db.check_exist_chat_id(message.from_user.id):
-        with open("messages\\start.txt", "r", encoding="utf-8") as file:
+        with open("messages/start.txt", "r", encoding="utf-8") as file:
             hello_text = file.read().format(user_name=message.from_user.full_name)
         await message.answer(text=hello_text)
         await message.answer(text="Введите свое имя",
                              reply_markup=types.ReplyKeyboardRemove())
-        await state.set_state(AddUser.choose_login)
+        await state.set_state(AddUser.user_name)
     else:
         await message.answer(text="Вы уже зарегистрированы в системе",
                              reply_markup=main_kb)
@@ -51,9 +51,9 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     current_state = await state.get_state()
     using_state = AddTask if "AddTask" in str(current_state) else AddUser
     if current_state == AddTask.name or current_state == AddUser.user_name:
-        await message.answer('Предыдущего шага нет\nВведите имя задачи или "отмена"')
+        await message.answer('Предыдущего шага нет\nВведите "отмена", чтобы оменить действия')
         return
-    if current_state == AddUser.login_value:
+    elif current_state == AddUser.login_value:
         await message.answer("Ок, выберите, каким будет Ваш логин",
                              reply_markup=get_callback_btns(btns={
                                  "username телеграма": "tgusername",
@@ -65,18 +65,18 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     for step in using_state.__all_states__:
         if step.state == current_state:
             await state.set_state(previous)
-            with open("messages\\prev_step.txt", "r", encoding="utf-8") as file:
+            with open("messages/prev_step.txt", "r", encoding="utf-8") as file:
                 text = file.read().format(step=using_state.texts[previous.state])
             await message.answer(text=text)
             return
         previous = step
 
 
-@user_router.message(AddUser.choose_login, F.text)
+@user_router.message(AddUser.user_name, F.text)
 async def choose_login(message: Message, state: FSMContext) -> None:
     ''' The handler processes the message when Add User.choose_login is active in FSM '''
     await state.update_data(user_name=message.text)
-    with open("messages\\choose_login.txt", "r", encoding="utf-8") as file:
+    with open("messages/choose_login.txt", "r", encoding="utf-8") as file:
         text = file.read()
     await message.answer(text=text,
                          reply_markup=get_callback_btns(btns={
@@ -94,7 +94,7 @@ async def choose_tgusername(callback: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     data["chat_id"] = callback.from_user.id
     await db.insert_user(data=data)
-    with open("messages\\success_register.txt", "r", encoding="utf-8") as file:
+    with open("messages/success_register.txt", "r", encoding="utf-8") as file:
         text = file.read().format(user_name=data["user_name"], login=data["login_value"])
     await callback.message.answer(text=text, reply_markup=main_kb)
     await state.clear()
@@ -118,7 +118,7 @@ async def input_user_name(message: Message, state: FSMContext) -> None:
         data = await state.get_data()
         data["chat_id"] = message.from_user.id
         await db.insert_user(data=data)
-        with open("messages\\success_register.txt", "r", encoding="utf-8") as file:
+        with open("messages/success_register.txt", "r", encoding="utf-8") as file:
             text = file.read().format(user_name=data["user_name"], login=data["login_value"])
         await message.answer(text=text, reply_markup=main_kb)
         await state.clear()
@@ -137,13 +137,9 @@ async def menu_cmd(message: Message):
 @user_router.message(StateFilter(None), F.text.lower() == "добавить задачу")
 async def add_task(message: Message, state: FSMContext) -> None:
     ''' This handler receives messages with `/добавить задачу` command '''
-    current_state = await state.get_state()
-    print(current_state)
     await message.answer(text="Введите имя задачи",
                          reply_markup=types.ReplyKeyboardRemove())
     await state.set_state(AddTask.name)
-    current_state = await state.get_state()
-    print(current_state)
 
 
 @user_router.message(AddTask.name, F.text)
@@ -179,7 +175,7 @@ async def finish_add_task(message: Message, state: FSMContext) -> None:
             await message.answer(text="Задача успешно обновлена",
                                 reply_markup=main_kb)
     except asyncpg.exceptions.ForeignKeyViolationError:
-        with open("messages\\no_register.txt", "r", encoding="utf-8") as file:
+        with open("messages/no_register.txt", "r", encoding="utf-8") as file:
             text = file.read()
         await message.answer(text=text, reply_markup=types.ReplyKeyboardRemove())
     finally:
