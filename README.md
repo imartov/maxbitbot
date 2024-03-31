@@ -1,8 +1,8 @@
-# [Maxbitbot](https://t.me/maxbittgbot) | Telegram Task Manager Bot
+# Maxbitbot | Telegram Task Manager Bot
 
 ## Overview
 
-The [Maxbitbot | Telegram Task Manager Bot](https://t.me/maxbittgbot) is a Python-based bot that helps users manage their tasks efficiently on the Telegram platform. Users can register, add tasks, modify them, mark them as complete, and delete them.
+The Maxbitbot | Telegram Task Manager Bot is a Python-based bot that helps users manage their tasks efficiently on the Telegram platform. Users can register, add tasks, modify them, mark them as complete, and delete them.
 
 ## Features
 
@@ -94,7 +94,7 @@ cd maxbitbot
    ```
 **Attention!** Before executing the command, make sure that your database is running and its settings correspond to the variables specified in .env.
 
-6. Find the bot in the telegram - [Maxbitbot](https://t.me/maxbittgbot) run the `start` command and enjoy using it!
+6. Find your bot in the telegram, run the `start` command and enjoy using it!
 
 2. **Interacting with the Bot**: Users can interact with the bot by sending commands and following the bot's prompts for task management.
 
