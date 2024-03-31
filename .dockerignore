@@ -3,3 +3,6 @@ commands
 
 # images
 images/
+
+# env
+.env
