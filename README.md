@@ -22,7 +22,7 @@ The Telegram Task Manager Bot is a Python-based bot that helps users manage thei
 
 ## Project Structure
 ```bash
-telegram-task-manager-bot/
+maxbitbot/
 ├── common/
 │   └── bot_cmds_list.py          
 ├── database/
@@ -102,7 +102,7 @@ This section contains an architectural description of the solution, including a 
     - ***description*** - a longer description of the task
 
 ### Diagram of components and interactions
-![alt text](comp_dia.jpg)
+![alt text](images/comp_dia.jpg)
 
 ## Description of the main classes and functions, their purpose and interaction
 
@@ -153,21 +153,96 @@ The main classes and functions:
 This section contains a detailed description of the main application scenario.
 
 ### Adding a task
-![alt text](addtask-1.jpg)
+![alt text](images/addtask-1.jpg)
 
 ### Updating the task
-![alt text](updatetask.jpg)
+![alt text](images/updatetask.jpg)
 
 ### Viewing tasks
-![alt text](showtasks.jpg)
+![alt text](images/showtasks.jpg)
 
 ### The task management
-![alt text](managtask.jpg)
+![alt text](images/managtask.jpg)
 
 ### Cancel or back FSM
 At each step when using FSM, the user can enter:  
 - `отмена`, which will cancel all the actions performed, or  
-- `назад`, which will return the user to the previous step
+- `назад`, which will return the user to the previous step.
+
+## Description of the database structure and the SQL queries used
+### Models:
+- **User**. It contains the following properties:  
+    - ***chat_id*** - Integer, Primary Key
+    - ***user_name*** - String(100)
+    - ***login*** - String(100), Unique
+
+- **Task**. It contains the following properties:  
+    - ***id*** - Integer, Serial, Primary Key
+    - ***chat_id*** - Integer, foreign key of ***User.chat_id***
+    - ***name*** - String(256)
+    - ***description*** - Text
+
+- **Completedtask**. It contains the following properties:  
+    - ***id*** - Integer, Serial, Primary Key
+    - ***chat_id*** - Integer, Foreign Key of ***User.chat_id***
+    - ***name*** - String(256)
+    - ***description*** - Text
+
+### SQL queries:
+- **extract the chat_id**:
+    - method: `database.sql_query.check_exist_chat_id`
+    - query: `SELECT chat_id FROM users WHERE chat_id = <value>`
+    - plan:  
+    ![alt text](images/image.png)
+
+- **extract the login**:
+    - method: `database.sql_query.check_exist_login`
+    - query: `SELECT login FROM users WHERE login = <value>`
+    - plan:  
+    ![alt text](images/image-1.png)
+
+- **insert a user**:
+    - method: `database.sql_query.insert_user`
+    - query: `INSERT INTO users(chat_id, user_name, login) VALUES(<value>, <value>, <value>)`  
+    - plan:  
+    ![alt text](images/image-2.png)
+
+- **insert a task**:
+    - method: `database.sql_query.insert_user`
+    - query: `INSERT INTO task(chat_id, name, description) VALUES(<value>, <value>, <value>)`  
+    - plan:  
+    ![alt text](images/image-3.png)
+
+- **update the task**:
+    - method: `database.sql_query.update_task`
+    - query: `INSERT INTO task(chat_id, name, description) VALUES(<value>, <value>, <value>)`  
+    - plan:  
+    ![alt text](images/image-4.png)
+
+- **select tasks**:
+    - method: `database.sql_query.select_tasks`
+    - query: `SELECT id, name FROM task WHERE chat_id = <value>`  
+    - plan:  
+    ![alt text](images/image-5.png)
+
+- **select the task**:
+    - method: `database.sql_query.select_detail_tasks`
+    - query: `SELECT id, name, description FROM task WHERE id = <vakue>`  
+    - plan:  
+    ![alt text](images/image-6.png)
+
+- **insert row to completedtask**:
+    - method: `database.sql_query.complete_task`
+    - query: `INSERT INTO completedtask(chat_id, name, escription) VALUES(<value>, <value>, <value>)`  
+    - plan:  
+    ![alt text](images/image-7.png)
+
+- **delete row from task**:
+    - method: `database.sql_query.delete_task`
+    - query: `DELETE FROM task WHERE id = '1'`  
+    - plan:  
+    ![alt text](images/image-8.png)
+
 
 ## Contributing
 
