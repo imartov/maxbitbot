@@ -287,4 +287,4 @@ THE SOFTWARE.
 
 For any inquiries or issues, please contact:  
 alexandr.kosyrew@mail.ru  
-[Telegram](https://t.me.alr_ks)
+[Telegram](https://t.me/alr_ks)
