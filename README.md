@@ -80,6 +80,12 @@ cd maxbitbot
     ```bash
     docker-compose up
     ```
+    When running using the `docker-compose` command, make sure that the environment variables in the .env file correspond to the following values:
+   ```plaintext
+   DB_USER=maxbituser
+   DB_PASSWORD=maxbitpassword
+   DB_NAME=maxbitdb
+   ```
 
 ### Classic approach
 
