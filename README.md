@@ -87,6 +87,12 @@ cd maxbitbot
    DB_NAME=maxbitdb
    ```
 
+### Docker Image
+4. **Docker Image**: you can also execute pull and run [Docker Image](https://hub.docker.com/repository/docker/imartov/maxbittgbot/general):
+   ```bash
+   docker run -d -e TG_ROKEN=<your-telegram-bot-token> -e DB_USER=<your-database-user> -e DB_PASSWORD=<your-database-password> -e DB_HOST=<your-database-host> -e DB_PORT=<your-database-post> -e DB_NAME=<your-database-name> imartov/maxbittgbot:latest
+   ```
+
 ### Classic approach
 
 4. **Install Dependencies**: Install the required Python dependencies using pip.
